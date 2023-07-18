@@ -60,7 +60,7 @@ const run = async function () {
   });
 
   discordClient.on("ready", () => {
-    console.log("I'm ready!");
+    console.log("Discord client ready!");
   });
 
   discordClient.on("messageCreate", async (message: Message) => {
@@ -104,7 +104,7 @@ const createInworldClient = async (message: Message) => {
       key: process.env.INWORLD_KEY!,
       secret: process.env.INWORLD_SECRET!,
     })
-    .setConfiguration({ capabilities: { audio: false } })
+    .setConfiguration({ capabilities: { audio: false, emotions: true } })
     .setScene(process.env.INWORLD_SCENE!)
     .setOnError(handleError(message))
     .setOnMessage((packet: InworldPacket) => {
@@ -113,8 +113,11 @@ const createInworldClient = async (message: Message) => {
         return;
       }
 
-      if (packet.isText() && packet.text.final) {
-        (message.channel as TextChannel).send(packet.text.text);
+      if (packet.isText()) {
+        const text = packet.text.text;
+        if (text === "") return;
+
+        (message.channel as TextChannel).send(text);
       }
     })
     .build();
